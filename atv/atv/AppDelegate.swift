@@ -7,40 +7,93 @@
 //
 
 import UIKit
+import TVMLKit
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, TVApplicationControllerDelegate {
 
     var window: UIWindow?
+    var appController: TVApplicationController?
 
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-        // Override point for customization after application launch.
+        
+        /*
+        Create the TVApplicationControllerContext for this application
+        and set the properties that will be passed to the `App.onLaunch` function
+        in JavaScript.
+        */
+        let appControllerContext = TVApplicationControllerContext()
+        
+        let d:UIDevice = UIDevice.currentDevice()
+        let simulate = (d.name == "iPhone Simulator")
+        let path = NSBundle.mainBundle().pathForResource("Private", ofType: "plist")
+        if (path == nil) {
+            NSLog("Must have Private.plist with 'JSPREFIX', 'SIMULATORJSPREFIX' and 'APIURL' defined");
+            exit(-1);
+        }
+        let myDict = NSDictionary(contentsOfFile: path!);
+        var baseURL:String
+            //var baseURL:String = myDict?.valueForKey("JSPREFIX") as! String
+        if (simulate) {
+            baseURL = myDict?.valueForKey("SIMULATORJSPREFIX") as! String
+        } else {
+            baseURL = myDict?.valueForKey("JSPREFIX") as! String
+        }
+    
+        let bootURL = baseURL + "js/ia.js"
+        
+        /*
+        The JavaScript URL is used to create the JavaScript context for your
+        TVMLKit application. Although it is possible to separate your JavaScript
+        into separate files, to help reduce the launch time of your application
+        we recommend creating minified and compressed version of this resource.
+        This will allow for the resource to be retrieved and UI presented to
+        the user quickly.
+        */
+        if let javaScriptURL = NSURL(string: bootURL) {
+            appControllerContext.javaScriptApplicationURL = javaScriptURL
+        }
+        
+        appControllerContext.launchOptions["BASEURL"] = baseURL
+        
+        appControllerContext.launchOptions["APIURL"] = myDict?.valueForKey("APIURL") as! String
+        
+        
+        if let launchOptions = launchOptions as? [String: AnyObject] {
+            for (kind, value) in launchOptions {
+                appControllerContext.launchOptions[kind] = value
+            }
+        }
+        
+        appController = TVApplicationController(context: appControllerContext, window: window, delegate: self)
+
         return true
     }
-
-    func applicationWillResignActive(application: UIApplication) {
-        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-        // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
+    
+    // MARK: TVApplicationControllerDelegate
+    
+    func appController(appController: TVApplicationController, didFinishLaunchingWithOptions options: [String: AnyObject]?) {
+        print("\(__FUNCTION__) invoked with options: \(options)")
     }
-
-    func applicationDidEnterBackground(application: UIApplication) {
-        // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-        // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+    
+    func appController(appController: TVApplicationController, didFailWithError error: NSError) {
+        print("\(__FUNCTION__) invoked with error: \(error)")
+        
+        let title = "Error Launching Application"
+        let message = error.localizedDescription
+        let alertController = UIAlertController(title: title, message: message, preferredStyle:.Alert )
+        // we want to send the message back to matinee
+        self.appController?.navigationController.presentViewController(alertController, animated: true, completion: { () ->     Void in
+            // ...
+        })
+        
     }
-
-    func applicationWillEnterForeground(application: UIApplication) {
-        // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
+    
+    func appController(appController: TVApplicationController, didStopWithOptions options: [String: AnyObject]?) {
+        print("\(__FUNCTION__) invoked with options: \(options)")
     }
-
-    func applicationDidBecomeActive(application: UIApplication) {
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-    }
-
-    func applicationWillTerminate(application: UIApplication) {
-        // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-    }
-
+    
 
 }
 
