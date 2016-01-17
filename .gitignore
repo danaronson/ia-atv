@@ -1,0 +1,9 @@
+*~
+#*#
+Private.plist
+.DS_STORE
+atv/atv.xcodeproj/project.xcworkspace/xcshareddata
+atv/atv.xcodeproj/project.xcworkspace/xcuserdata
+atv/atv.xcodeproj/xcuserdata
+project.xcworkspace/xcuserdata/
+xcuserdata/
