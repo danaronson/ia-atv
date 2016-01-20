@@ -5,7 +5,7 @@ function IA(options) {
 IA.prototype.search = function(query_string, search_options, success_callback, failure_callback) {
   var self = this;
   var request = new XMLHttpRequest();
-  var option_string = "";
+  var option_string = "&output=json";
   for (var key in search_options) {
     option_string += "&" + key + "=" + search_options[key];
   }
@@ -20,6 +20,10 @@ IA.prototype.search = function(query_string, search_options, success_callback, f
   request.addEventListener("error", function (error) {
     failure_callback.call(self, request, error);
   });
+  request.addEventListener("timeout", function () {
+    console.log("timeout");
+  });
+
   var request_string = this.APIURL + "advancedsearch.php?q=" + query_string + option_string;
   request_string = encodeURI(request_string);
   request.open("GET", request_string);
@@ -27,3 +31,25 @@ IA.prototype.search = function(query_string, search_options, success_callback, f
   request.setRequestHeader("Accept", "application/json")
   request.send();
 }
+
+IA.prototype.get_sub_collections = function(collection_name, num, success_function, failure_function) {
+  var options = {"rows" : "10"}
+  if (num) {
+    options["rows"] = num.toString();
+  }
+  this.search("collection:(" + collection_name + ") AND mediatype:collection", options,
+	      function (ia_data) {
+		if (0 == ia_data.responseHeader.status) {
+		  if (!num) {
+		    this.get_sub_collections(collection_name, ia_data.response.numFound, success_function, failure_function);
+		  } else {
+		    if (num == ia_data.response.numFound) {
+		      success_function.call(this, ia_data.response.docs);
+		    } else {
+		      failure_function.call(this, ia_data);
+		    }
+		  }
+		}
+	      }, failure_function);
+}
+  
