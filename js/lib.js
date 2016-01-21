@@ -32,16 +32,16 @@ IA.prototype.search = function(query_string, search_options, success_callback, f
   request.send();
 }
 
-IA.prototype.get_sub_collections = function(collection_name, num, success_function, failure_function) {
+IA.prototype.get_collections = function(collection_name, result_type, num, success_function, failure_function) {
   var options = {"rows" : "10"}
   if (num) {
     options["rows"] = num.toString();
   }
-  this.search("collection:(" + collection_name + ") AND mediatype:collection", options,
+  this.search("collection:(" + collection_name + ") AND mediatype:" + result_type, options,
 	      function (ia_data) {
 		if (0 == ia_data.responseHeader.status) {
 		  if (!num) {
-		    this.get_sub_collections(collection_name, ia_data.response.numFound, success_function, failure_function);
+		    this.get_collections(collection_name, result_type, ia_data.response.numFound, success_function, failure_function);
 		  } else {
 		    if (num == ia_data.response.numFound) {
 		      success_function.call(this, ia_data.response.docs);
