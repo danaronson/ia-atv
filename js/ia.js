@@ -26,7 +26,7 @@ var APP = APP || {
 	for (var index in metadata.files) {
 	  var name = metadata.files[index].name;
 	  if (name.endsWith(".mp4")) {
-	    mp4_file = "https://archive.org/download/" + item_id + "/" + name;
+	    mp4_file = "https://archive.org/download/" + item_id + "/" + encodeURI(name);
 	  }
 	}
 	if (mp4_file) {
