@@ -14,18 +14,106 @@ var Forms = {
                      </collectionList>
                    </stackTemplate>`,
 
-  tmp_template: ` <stackTemplate itmlID="id_3">
-    <banner itmlID="id_4">
-    <title id="title" itmlID="id_6">movies</title>
-    </banner>
-    <collectionList itmlID="id_5">
-    <grid itmlID="id_7">
-    <section id="section" itmlID="id_8">
-    <lockup itmlID="id_11" ia_ID="thechrisgethardshow">
-    <img itmlID="id_12" src="https://archive.org/services/get-item-image.php?identifier=thechrisgethardshow" width="182" height="274"/>
-    <title itmlID="id_13">The Chris Gethard Show</title>
-    </lockup></section></grid></collectionList></stackTemplate>`,
+  catalog_template:   `<catalogTemplate>
+                        <banner>
+                          <title id="title"/>
+                       </banner>
+                       <list>
+                         <section id="section"/>
+                       </list>
+                     </catalogTemplate>`,
+
+  showcase_template: `<showcaseTemplate mode="showcase">
+                        <background/>
+                        <banner>
+                          <title id="title"/>
+                        </banner>
+                        <carousel>
+                          <section id="section"/>
+                        </carousel>
+                      </showcaseTemplate>`,
+
+  product_bundle_template: `<productBundleTemplate>
+                              <background/>
+                              <banner>
+                                <stack>
+                                  <title id="title"/>
+                                  <text id="description"/>
+                                  <row>
+                                    <buttonLockup>
+                                      <badge src="resource://button-preview" />
+                                      <title>Play</title>
+                                    </buttonLockup>
+                                  </row>
+                                </stack>
+                                <heroImg id="heroImg"/>
+                              </banner>
+                              <shelf>
+                                <header>
+                                  <title>Movies</title>
+                                </header>
+                                <section id="section"/>
+                              </shelf>
+                            </productBundleTemplate>`,
     
+    
+
+  tmp_template: `<catalogTemplate itmlID="id_3">
+    <banner itmlID="id_4">
+    <title id="title" itmlID="id_5">Digitized From VHS</title>
+    </banner>
+    <list itmlID="id_8">
+    <section id="section" itmlID="id_9">
+    <listItemlockup itmlID="id_10" ia_ID="Real_Stories_of_the_Highway_Patrol_-_Car_Crashes_Crisis_on_the_Interstate_1996_VHSRip">
+    <title itmlID="id_11">Real Stories of the Highway Patrol - Car Crashes Crisis on the Interstate</title>
+    </listItemlockup>
+    <listItemlockup itmlID="id_13" ia_ID="CNN_Video_-_The_Road_to_the_White_House_92_1992_VHSRip">
+    <title itmlID="id_14">CNN Video - The Road to the White House 92</title>
+    </listItemlockup>
+    </section>
+    </list>
+    </catalogTemplate>
+    `,
+
+  tmp1_template: `  <catalogTemplate>
+    <banner>
+    <title>Movies</title>
+    </banner>
+    <list>
+    <section>
+    <listItemLockup>
+    <title>All Movies</title>
+    <decorationLabel>6</decorationLabel>
+    </listItemLockup>
+    </section>
+    </list>
+    </catalogTemplate>
+    `,
+
+    tmp2_template: `  <catalogTemplate>
+    <banner>
+    <title>Movies</title>
+    </banner>
+    <list>
+    <section>
+    <listItemLockup>
+    <title>All Movies</title>
+    <decorationLabel>6</decorationLabel>
+    <relatedContent>
+    <grid>
+    <section>
+    <lockup>
+    <img src="path to images on your server/Car_Movie_250x375_A.png" width="250" height="376" />
+    <title>Movie 1</title>
+    </lockup>
+    </section>
+    </grid>
+    </relatedContent>
+    </listItemLockup>
+    </section>
+    </list>
+    </catalogTemplate>
+    `,
 
   add_menu_item: function(menu_item_doc, id, menu_doc) {
     var menu_node = menu_doc.getElementById("menu");
@@ -40,11 +128,16 @@ var Forms = {
     lockup.setAttribute("ia_ID", identifier);
     var img = this.add_node(doc, lockup, "img")
     img.setAttribute("src", "https://archive.org/services/get-item-image.php?identifier=" + identifier);
-    img.setAttribute("width", "180");
-    img.setAttribute("height", "180");
+    img.setAttribute("width", "240");
+    img.setAttribute("height", "240");
     var title = this.add_node(doc, lockup, "title", title);
   },
 
+  insert_list_item_lockup: function(doc, section, identifier, title) {
+    var lockup = this.add_node(doc, section, "listItemLockup");
+    lockup.setAttribute("ia_ID", identifier);
+    var title = this.add_node(doc, lockup, "title", title);
+  },
 
   add_node: function (doc, parent, nodeName, text) {
     var node = doc.createElement(nodeName);

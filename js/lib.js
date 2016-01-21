@@ -10,21 +10,25 @@ IA.prototype.search = function(query_string, search_options, success_callback, f
     option_string += "&" + key + "=" + search_options[key];
   }
   request.responseType = "application/json";
+  var request_string = this.APIURL + "advancedsearch.php?q=" + query_string + option_string;
   request.addEventListener("load", function() {
     if (200 != request.status) {
+      console.log("failure for: " + request_string);
       failure_callback.call(self, request);
     } else {
+      console.log("success for: " + request_string);
       success_callback.call(self, JSON.parse(request.response));
     }
   });
   request.addEventListener("error", function (error) {
+      console.log("failure for: " + request_string);
     failure_callback.call(self, request, error);
   });
   request.addEventListener("timeout", function () {
     console.log("timeout");
   });
 
-  var request_string = this.APIURL + "advancedsearch.php?q=" + query_string + option_string;
+  console.log("about to request: " + request_string);
   request_string = encodeURI(request_string);
   request.open("GET", request_string);
   request.setRequestHeader("Content-Type", "application/json")
@@ -52,4 +56,29 @@ IA.prototype.get_collections = function(collection_name, result_type, num, succe
 		}
 	      }, failure_function);
 }
-  
+
+
+IA.prototype.get_metadata = function(identifier, success_callback, failure_callback) {
+  var self = this;
+  var request = new XMLHttpRequest();
+  request.responseType = "application/json";
+  request.addEventListener("load", function() {
+    if (200 != request.status) {
+      failure_callback.call(self, request);
+    } else {
+      success_callback.call(self, JSON.parse(request.response));
+    }
+  });
+  request.addEventListener("error", function (error) {
+    failure_callback.call(self, request, error);
+  });
+  request.addEventListener("timeout", function () {
+    console.log("timeout");
+  });
+
+  var request_string = this.APIURL + "metadata/" + identifier;
+  request.open("GET", request_string);
+  request.setRequestHeader("Content-Type", "application/json")
+  request.setRequestHeader("Accept", "application/json")
+  request.send();
+}

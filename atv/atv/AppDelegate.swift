@@ -26,7 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, TVApplicationControllerDe
         let appControllerContext = TVApplicationControllerContext()
         
         let d:UIDevice = UIDevice.currentDevice()
-        let simulate = (d.name == "iPhone Simulator")
+        let simulate = (d.name == "Apple TV Simulator")
         let path = NSBundle.mainBundle().pathForResource("Private", ofType: "plist")
         if (path == nil) {
             NSLog("Must have Private.plist with 'JSPREFIX', 'SIMULATORJSPREFIX' and 'APIURL' defined");
