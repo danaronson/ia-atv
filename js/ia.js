@@ -28,9 +28,13 @@ var APP = APP || {
       }
     });
     files_to_play.sort(function (file_a, file_b) {
-      return parseInt(file_b.track) - parseInt(file_a.track);
+      return parseInt(file_a.track) - parseInt(file_b.track);
     }).map(function (file) {
-      playlist.push(new MediaItem(media_type, "https://archive.org/download/" + item_id + "/" + encodeURI(file.name)));
+      var item = new MediaItem(media_type, "https://archive.org/download/" + item_id + "/" + encodeURI(file.name));
+      item.title = file.title;
+      item.subtitle = file.album;
+      item.archiveImageURL = "https://archive.org/services/get-item-image.php?identifier=" + item_id;
+      playlist.push(item);
     });
     player.playlist = playlist;
     player.play();
@@ -90,7 +94,7 @@ var APP = APP || {
 	return parseInt(b) - parseInt(a);
       }).map(function (year) {
 	var collection_with_year = ia_collection_id + ":" + year;
-	Forms.insert_lockup(doc, section, collection_with_year, year + " (" + self.collection_years[collection_with_year].length + ")");
+	Forms.insert_lockup(doc, section, collection_with_year, year + " (" + self.collection_years[collection_with_year].length + ")", ia_collection_id);
       });
       // console.log("index: " + index.toString() + ", identifier: " + ia_item.identifier + ", title: " + ia_item.title);
     });
