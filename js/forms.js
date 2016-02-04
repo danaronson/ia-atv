@@ -128,8 +128,8 @@ var Forms = {
     lockup.setAttribute("ia_ID", identifier);
     var img = this.add_node(doc, lockup, "img")
     img.setAttribute("src", "https://archive.org/services/get-item-image.php?identifier=" + identifier);
-    img.setAttribute("width", "240");
-    img.setAttribute("height", "240");
+    img.setAttribute("width", "360");
+    img.setAttribute("height", "360");
     var title = this.add_node(doc, lockup, "title", title);
   },
 
@@ -162,9 +162,11 @@ var Forms = {
   make_menu: function () {
     APP.top_doc = this.make_doc(this.menu_template);
     APP.movies_doc = this.make_doc(this.stack_template);
+    APP.music_doc = this.make_doc(this.stack_template);
     this.add_menu_item(APP.movies_doc, "movies", APP.top_doc);
+    this.add_menu_item(APP.music_doc, "music", APP.top_doc);
     APP.movies_doc.getElementById('title').innerHTML = "movies";
-    this.push(APP.top_doc);
+    APP.music_doc.getElementById('title').innerHTML = "music";
     return;
   }
 }

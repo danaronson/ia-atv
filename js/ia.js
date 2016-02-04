@@ -1,18 +1,68 @@
+"use strict";
 var APP = APP || {
   movies: function () {
     console.log("in show_movie_page");
   },
   collections: {},
+  collection_years: {},
 
-  play: function(url) {
+  play: function(item_id, files, top_level_collection_name) {
     var player = new Player;
     var playlist = new Playlist();
-    playlist.push(new MediaItem("video", url));
+    var files_to_play = [];
+    var stop = false;
+    var media_type = (top_level_collection_name == "movies") ? "video" : "audio";
+    files.map(function (file) {
+      if (!stop) {
+	if ("movies" == top_level_collection_name) {
+	  if (file.name.endsWith(".mp4")) {
+	    files_to_play.push(file);
+	    // break; damn javascript, can't do break in map
+	    stop = true;
+	  }
+	} else if ("etree" == top_level_collection_name) {
+	  if (file.name.endsWith(".mp3")) {
+	    files_to_play.push(file);
+	  }
+	}
+      }
+    });
+    files_to_play.sort(function (file_a, file_b) {
+      return parseInt(file_b.track) - parseInt(file_a.track);
+    }).map(function (file) {
+      playlist.push(new MediaItem(media_type, "https://archive.org/download/" + item_id + "/" + encodeURI(file.name)));
+    });
     player.playlist = playlist;
     player.play();
   },
 
-  show_catalog: function (ia_collection_id) {
+  show_collection_years: function (event, top_level_collection_name) {
+    var self = this;
+    var item_id = event.target.getAttribute("ia_ID")
+    var doc = Forms.make_doc(Forms.showcase_template);
+    var section = doc.getElementById("section");
+    section.addEventListener("select", function (event) {
+      self.show_a_year.call(self, event, top_level_collection_name);
+    });
+    Forms.push(doc);
+    var sorted_items = self.collection_years[item_id].sort(function (item_a, item_b) {
+      return parseInt(item_b.week) - parseInt(item_a.week);
+    });
+    doc.getElementById("title").innerHTML = item_id; // could use the title from the first item combined with the year
+    sorted_items.map(function (item) {
+      Forms.insert_lockup(doc, section, item.identifier, item.title);
+    });
+  },
+
+  show_a_year: function (event, top_level_collection_name) {
+    var self = this;
+    var item_id = event.target.getAttribute("ia_ID")
+    self.ia.get_metadata(item_id, function (metadata) {
+      self.play(item_id, metadata.files, top_level_collection_name);
+    });
+  },
+
+  show_catalog: function (ia_collection_id, collection_name) {
     var self = this;
     var collection_item = this.collections[ia_collection_id];
     var doc = Forms.make_doc(Forms.showcase_template);
@@ -20,33 +70,51 @@ var APP = APP || {
     Forms.push(doc);
     var section = doc.getElementById("section");
     section.addEventListener("select", function (event) {
-      var item_id = event.target.getAttribute("ia_ID")
-      self.ia.get_metadata(item_id, function (metadata) {
-	var mp4_file;
-	for (var index in metadata.files) {
-	  var name = metadata.files[index].name;
-	  if (name.endsWith(".mp4")) {
-	    mp4_file = "https://archive.org/download/" + item_id + "/" + encodeURI(name);
-	  }
-	}
-	if (mp4_file) {
-	  self.play(mp4_file);
-	}
-	else {
-	  console.log("can't find mp4 in metadata");
-	}
-      });
+      self.show_collection_years.call(self, event, collection_name);
     });
-    this.ia.get_collections(ia_collection_id, "movies", undefined, function (data) {
-      for (var index in data) {
-	ia_item = data[index];
+    this.ia.get_collections(ia_collection_id, collection_name, undefined, function (collection_name, data) {
+      var collections_for_years = {}
+      data.map(function (ia_item) {
 	self.collections[ia_item.identifier] = ia_item;
-	Forms.insert_lockup(doc, section, ia_item.identifier, ia_item.title);
-	console.log("index: " + index.toString() + ", identifier: " + ia_item.identifier + ", title: " + ia_item.title);
-      }
+	if (!ia_item.year) {
+	  ia_item.year = "Undated";
+	}
+	var collection_with_year = ia_collection_id + ":" + ia_item.year;
+	collections_for_years[ia_item.year] = 1;
+	if (!self.collection_years[collection_with_year]) {
+	  self.collection_years[collection_with_year] = [];
+	}
+	(self.collection_years[collection_with_year]).push(ia_item);
+      });
+      Object.keys(collections_for_years).sort(function (a, b) {
+	return parseInt(b) - parseInt(a);
+      }).map(function (year) {
+	var collection_with_year = ia_collection_id + ":" + year;
+	Forms.insert_lockup(doc, section, collection_with_year, year + " (" + self.collection_years[collection_with_year].length + ")");
+      });
+      // console.log("index: " + index.toString() + ", identifier: " + ia_item.identifier + ", title: " + ia_item.title);
     });
+  },
+  process_collection: function (collection_name, collections, form_doc) {
+    var self = this;
+    var section = form_doc.getElementById('section');
+    var title = form_doc.getElementById('title');
+    for (var id in collections) {
+      var collection = collections[id];
+      self.collections[collection["identifier"]] = collection;
+      Forms.insert_lockup(form_doc, section, collection["identifier"], collection["title"] + " (" + collection["downloads"] + ")");
+    }
+    form_doc.getElementById("section").addEventListener("highlight", function (event) {
+      title.innerHTML = collection_name + " (" + event.target.getAttribute("ia_ID") + ")";
+    });
+	  
+    form_doc.getElementById("section").addEventListener("select", function (event) {
+      self.show_catalog(event.target.getAttribute("ia_ID"), collection_name);
+      console.log("got subcollection");
+    });
+    console.log("got " + collection_name + " collection");
   }
-};
+}
 
 App.onLaunch = function(options) {
   var javascriptFiles = [
@@ -58,28 +126,19 @@ App.onLaunch = function(options) {
       //Forms.push(Forms.make_doc(Forms.tmp1_template));
       //return;
       Forms.make_menu();
-      Forms.push(APP.movies_doc);
+      //Forms.push(APP.movies_doc);
       APP.ia = new IA(options);
-      APP.ia.get_collections("movies", "collection", undefined, function (movie_collections) {
-	var section = APP.movies_doc.getElementById('section');
-	var title = APP.movies_doc.getElementById('title');
-	for (var id in movie_collections) {
-	  var collection = movie_collections[id];
-	  APP.collections[collection["identifier"]] = collection;
-	  Forms.insert_lockup(APP.movies_doc, section, collection["identifier"], collection["title"]);
-	}
-	APP.movies_doc.getElementById("section").addEventListener("highlight", function (event) {
-	  title.innerHTML = "Movies (" + event.target.getAttribute("ia_ID") + ")";
-	});
-								  
-	APP.movies_doc.getElementById("section").addEventListener("select", function (event) {
-	  APP.show_catalog(event.target.getAttribute("ia_ID"));
-	  console.log("got subcollection");
-	});
-	console.log("got movie collection");
-      }, function (ia_data) {
-	console.log("didn't get movie collection");
-      });
+      var forms = {"movies" : APP.movies_doc, "etree" : APP.music_doc};
+      for (var collection_type in forms) {
+	APP.ia.get_collections(collection_type, "collection", undefined,
+			       function (collection_name, collections) {
+				 APP.process_collection(collection_name, collections, forms[collection_name]);
+			       },
+			       function (collection_name, ia_data) {
+				 console.log("didn't get " + collection_name + " collection");
+			       });
+      }
+      Forms.push(APP.top_doc);
       console.log("launched with success");
     } else
       console.log("launched with failure");
