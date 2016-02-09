@@ -37,20 +37,33 @@ IA.prototype.search = function(query_string, search_options, success_callback, f
 }
 
 IA.prototype.get_collections = function(collection_name, result_type, num, success_function, failure_function) {
-  var options = {"rows" : "10"}
+  if (!failure_function) {
+    failure_function = function (collection_name, collection_data) {
+      console.log("Error while trying to get collection for: " + collection_name);
+    }
+  }
+  var options = {"rows" : "1", "fl[]" : "identifier,title,year,downloads,week"}
   if (num) {
     options["rows"] = num.toString();
+    // options["rows"] = "100"; FOR TESTING
   }
   this.search("collection:(" + collection_name + ") AND mediatype:" + result_type, options,
 	      function (ia_data) {
 		if (0 == ia_data.responseHeader.status) {
 		  if (!num) {
-		    this.get_collections(collection_name, result_type, ia_data.response.numFound, success_function, failure_function);
+		    // hopefully there are more than 0 items, if not it's an error
+		    if (0 == ia_data.response.numFound) {
+		      failure_function.call(this, collection_name, ia_data);
+		    } else {
+		      this.get_collections(collection_name, result_type, ia_data.response.numFound, success_function, failure_function);
+		    }
 		  } else {
 		    if (num == ia_data.response.numFound) {
-		      success_function.call(this, ia_data.response.docs);
+		      success_function.call(this, collection_name, ia_data.response.docs.sort(function (a, b) {
+			return parseInt(b.downloads) - parseInt(a.downloads);
+		      }));
 		    } else {
-		      failure_function.call(this, ia_data);
+		      failure_function.call(this, collection_name, ia_data);
 		    }
 		  }
 		}
