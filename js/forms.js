@@ -14,6 +14,15 @@ var Forms = {
                      </collectionList>
                    </stackTemplate>`,
 
+  search_template: `<searchTemplate>
+                      <searchField/>
+                      <shelf>
+                        <header>
+                         <title>Most Downloaded</title>
+                        </header>
+                        <section id="results"/>
+                      </shelf>
+                    </searchTemplate>`,
   catalog_template:   `<catalogTemplate>
                         <banner>
                           <title id="title"/>
@@ -166,8 +175,10 @@ var Forms = {
     APP.top_doc = this.make_doc(this.menu_template);
     APP.movies_doc = this.make_doc(this.stack_template);
     APP.music_doc = this.make_doc(this.stack_template);
+    APP.search_doc = this.make_doc(this.search_template)
     this.add_menu_item(APP.movies_doc, "movies", APP.top_doc);
     this.add_menu_item(APP.music_doc, "music", APP.top_doc);
+    this.add_menu_item(APP.search_doc, "search", APP.top_doc);
     return;
   }
 }
