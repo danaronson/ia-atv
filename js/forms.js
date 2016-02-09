@@ -168,8 +168,6 @@ var Forms = {
     APP.music_doc = this.make_doc(this.stack_template);
     this.add_menu_item(APP.movies_doc, "movies", APP.top_doc);
     this.add_menu_item(APP.music_doc, "music", APP.top_doc);
-    APP.movies_doc.getElementById('title').innerHTML = "movies";
-    APP.music_doc.getElementById('title').innerHTML = "music";
     return;
   }
 }

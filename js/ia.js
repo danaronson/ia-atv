@@ -33,7 +33,7 @@ var APP = APP || {
       var item = new MediaItem(media_type, "https://archive.org/download/" + item_id + "/" + encodeURI(file.name));
       item.title = file.title;
       item.subtitle = file.album;
-      item.archiveImageURL = "https://archive.org/services/get-item-image.php?identifier=" + item_id;
+      item.artworkImageURL = "https://archive.org/services/get-item-image.php?identifier=" + item_id;
       playlist.push(item);
     });
     player.playlist = playlist;
@@ -127,10 +127,8 @@ App.onLaunch = function(options) {
   ];
   evaluateScripts(javascriptFiles, function(success) {
     if (success) {
-      //Forms.push(Forms.make_doc(Forms.tmp1_template));
-      //return;
       Forms.make_menu();
-      //Forms.push(APP.movies_doc);
+
       APP.ia = new IA(options);
       var forms = {"movies" : APP.movies_doc, "etree" : APP.music_doc};
       for (var collection_type in forms) {
