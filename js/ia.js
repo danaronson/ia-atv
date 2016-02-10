@@ -46,7 +46,7 @@ var APP = APP || {
     var doc = Forms.make_doc(Forms.showcase_template);
     var section = doc.getElementById("section");
     section.addEventListener("select", function (event) {
-      self.show_a_year.call(self, event, top_level_collection_name);
+      self.play_item.call(self, event, top_level_collection_name);
     });
     Forms.push(doc);
     var sorted_items = self.collection_years[item_id].sort(function (item_a, item_b) {
@@ -58,7 +58,7 @@ var APP = APP || {
     });
   },
 
-  show_a_year: function (event, top_level_collection_name) {
+  play_item: function (event, top_level_collection_name) {
     var self = this;
     var item_id = event.target.getAttribute("ia_ID")
     self.ia.get_metadata(item_id, function (metadata) {
@@ -117,6 +117,46 @@ var APP = APP || {
       console.log("got subcollection");
     });
     console.log("got " + collection_name + " collection");
+  },
+
+  setup_search_form: function(form_doc) {
+    var self = this;
+    var keyboard = form_doc.getElementById('search').getFeature('Keyboard')
+
+    var movie_section = form_doc.getElementById("movie_results");
+    var music_section = form_doc.getElementById("music_results");
+
+    music_section.addEventListener("select", function(event){
+      self.play_item(event, "etree");
+    });
+    movie_section.addEventListener("select", function(event){
+      self.play_item(event, "movies");
+    });
+
+    keyboard.onTextChange = function () {
+      // console.log( "keyboard.text );
+      var search_options = {
+        "rows" : "50",
+        "fl[]" : "identifier,title,downloads,mediatype",
+        "sort[]" : "downloads+desc"
+      };
+      APP.ia.search(keyboard.text+" AND mediatype:(etree OR movies)", search_options,
+        function success(ia_data) {
+          // got search results
+          var docs = ia_data.response.docs;
+          // clear old results
+          Forms.remove_all_child_nodes(movie_section);
+          Forms.remove_all_child_nodes(music_section);
+          // insert new results
+          docs.map(function shelf_insert(item) {
+            console.log(item);
+            var section = item.mediatype == 'movies' ? movie_section : music_section;
+            Forms.insert_lockup(form_doc, section, item.identifier, item.title);
+          });
+        }, function failure() {
+          // TODO: handle search error
+        });
+    }
   }
 }
 
@@ -141,6 +181,7 @@ App.onLaunch = function(options) {
 			       });
       }
       Forms.push(APP.top_doc);
+      APP.setup_search_form(APP.search_doc);
       console.log("launched with success");
     } else
       console.log("launched with failure");

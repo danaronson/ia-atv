@@ -15,13 +15,21 @@ var Forms = {
                    </stackTemplate>`,
 
   search_template: `<searchTemplate>
-                      <searchField/>
+                      <searchField id="search"/>
+                     <collectionList>
                       <shelf>
                         <header>
-                         <title>Most Downloaded</title>
+                         <title>Most Downloaded Movies</title>
                         </header>
-                        <section id="results"/>
+                        <section id="movie_results"/>
                       </shelf>
+                      <shelf>
+                        <header>
+                         <title>Most Downloaded Music</title>
+                        </header>
+                        <section id="music_results"/>
+                      </shelf>
+                     </collectionList>
                     </searchTemplate>`,
   catalog_template:   `<catalogTemplate>
                         <banner>
@@ -160,6 +168,11 @@ var Forms = {
     return node;
   },
 
+  remove_all_child_nodes: function (parent) {
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }    
+  },
 
   make_doc: function (template) {
     var parser = new DOMParser();
