@@ -46,11 +46,11 @@ var Forms = {
     return node;
   },
 
-  remove_all_child_nodes: function (parent) {
-    while (parent.firstChild) {
-        parent.removeChild(parent.firstChild);
-    }    
-  },
+  // remove_all_child_nodes: function (parent) {
+  //   while (parent.firstChild) {
+  //       parent.removeChild(parent.firstChild);
+  //   }    
+  // },
 
   make_doc: function (template) {
     var parser = new DOMParser();
@@ -95,6 +95,11 @@ var Page = {
   },
   after_doc_create: function() {
     console.log("Page.after_doc_create() - shouldn't be called");
+  },
+  remove_all_child_nodes: function (parent) {
+    while (parent.firstChild) {
+        parent.removeChild( parent.firstChild );
+    }    
   },
 }
 
@@ -217,8 +222,8 @@ var SearchPage = Page.extend({
         // clear old results
         console.log("search callback this:",this);
         console.log("search callback self:",self);
-        Forms.remove_all_child_nodes(self.movie_section);
-        Forms.remove_all_child_nodes(self.music_section);
+        Page.remove_all_child_nodes(self.movie_section);
+        Page.remove_all_child_nodes(self.music_section);
         // insert new results
         docs.map(function shelf_insert(item) {
           var section = item.mediatype == 'movies' ? self.movie_section : self.music_section;
