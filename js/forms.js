@@ -1,36 +1,4 @@
 var Forms = {
-  menu_template: `<menuBarTemplate>
-                    <menuBar id="menu"/>
-                  </menuBarTemplate>`,
-
-  stack_template: `<stackTemplate>
-                     <banner>
-                       <title id="title"/>
-                     </banner>
-                     <collectionList>
-                       <grid>
-                         <section id="section"/>
-                       </grid>
-                     </collectionList>
-                   </stackTemplate>`,
-
-  search_template: `<searchTemplate>
-                      <searchField id="search"/>
-                     <collectionList>
-                      <shelf>
-                        <header>
-                         <title>Most Downloaded Movies</title>
-                        </header>
-                        <section id="movie_results"/>
-                      </shelf>
-                      <shelf>
-                        <header>
-                         <title>Most Downloaded Music</title>
-                        </header>
-                        <section id="music_results"/>
-                      </shelf>
-                     </collectionList>
-                    </searchTemplate>`,
 
   showcase_template: `<showcaseTemplate mode="showcase">
                         <background/>
@@ -41,10 +9,6 @@ var Forms = {
                           <section id="section"/>
                         </carousel>
                       </showcaseTemplate>`,
-
-  // registered docs and doc_definitions
-  doc_defs: {},
-  docs: {},
 
   add_menu_item: function(menu_item_doc, id, menu_doc) {
     var menu_node = menu_doc.getElementById("menu");
@@ -144,9 +108,6 @@ var MenuPage = Page.extend({
              </menuBarTemplate>`,
   //
   after_doc_create: function() {
-    // APP.movies_doc = Forms.make_doc(Forms.stack_template);
-    // APP.music_doc = Forms.make_doc(Forms.stack_template);
-
     var movie_collection_page = CollectionStackPage.create({ name: "movies", collection_type: "movies" });
     var music_collection_page = CollectionStackPage.create({ name: "music", collection_type: "etree" });
     var search_page = SearchPage.create({ name: "search" })
