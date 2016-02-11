@@ -119,45 +119,45 @@ var APP = APP || {
     console.log("got " + collection_name + " collection");
   },
 
-  setup_search_form: function(form_doc) {
-    var self = this;
-    var keyboard = form_doc.getElementById('search').getFeature('Keyboard')
+  // setup_search_form: function(form_doc) {
+  //   var self = this;
+  //   var keyboard = form_doc.getElementById('search').getFeature('Keyboard')
 
-    var movie_section = form_doc.getElementById("movie_results");
-    var music_section = form_doc.getElementById("music_results");
+  //   var movie_section = form_doc.getElementById("movie_results");
+  //   var music_section = form_doc.getElementById("music_results");
 
-    music_section.addEventListener("select", function(event){
-      self.play_item(event, "etree");
-    });
-    movie_section.addEventListener("select", function(event){
-      self.play_item(event, "movies");
-    });
+  //   music_section.addEventListener("select", function(event){
+  //     self.play_item(event, "etree");
+  //   });
+  //   movie_section.addEventListener("select", function(event){
+  //     self.play_item(event, "movies");
+  //   });
 
-    keyboard.onTextChange = function () {
-      // console.log( "keyboard.text );
-      var search_options = {
-        "rows" : "50",
-        "fl[]" : "identifier,title,downloads,mediatype",
-        "sort[]" : "downloads+desc"
-      };
-      APP.ia.search(keyboard.text+" AND mediatype:(etree OR movies)", search_options,
-        function success(ia_data) {
-          // got search results
-          var docs = ia_data.response.docs;
-          // clear old results
-          Forms.remove_all_child_nodes(movie_section);
-          Forms.remove_all_child_nodes(music_section);
-          // insert new results
-          docs.map(function shelf_insert(item) {
-            console.log(item);
-            var section = item.mediatype == 'movies' ? movie_section : music_section;
-            Forms.insert_lockup(form_doc, section, item.identifier, item.title);
-          });
-        }, function failure() {
-          // TODO: handle search error
-        });
-    }
-  }
+  //   keyboard.onTextChange = function () {
+  //     // console.log( "keyboard.text );
+  //     var search_options = {
+  //       "rows" : "50",
+  //       "fl[]" : "identifier,title,downloads,mediatype",
+  //       "sort[]" : "downloads+desc"
+  //     };
+  //     APP.ia.search(keyboard.text+" AND mediatype:(etree OR movies)", search_options,
+  //       function success(ia_data) {
+  //         // got search results
+  //         var docs = ia_data.response.docs;
+  //         // clear old results
+  //         Forms.remove_all_child_nodes(movie_section);
+  //         Forms.remove_all_child_nodes(music_section);
+  //         // insert new results
+  //         docs.map(function shelf_insert(item) {
+  //           console.log(item);
+  //           var section = item.mediatype == 'movies' ? movie_section : music_section;
+  //           Forms.insert_lockup(form_doc, section, item.identifier, item.title);
+  //         });
+  //       }, function failure() {
+  //         // TODO: handle search error
+  //       });
+  //   }
+  // }
 }
 
 App.onLaunch = function(options) {
@@ -169,22 +169,11 @@ App.onLaunch = function(options) {
     if (success) {
       // lib should be loaded by now
       APP.ia = new IA(options);
-
-      // Forms.make_menu();
       var menu_page = MenuPage.create({name: "Menu"});
-
- //      var forms = {"movies" : APP.movies_doc, "etree" : APP.music_doc};
- //      for (var collection_type in forms) {
-	// APP.ia.get_collections(collection_type, "collection", undefined,
-	// 		       function (collection_name, collections) {
-	// 			 APP.process_collection(collection_name, collections, forms[collection_name]);
-	// 		       },
-	// 		       function (collection_name, ia_data) {
-	// 			 console.log("didn't get " + collection_name + " collection");
-	// 		       });
- //      }
       Forms.push(menu_page.doc);
-      APP.setup_search_form(APP.search_doc);
+
+      // APP.setup_search_form(APP.search_doc);
+      
       console.log("launched with success");
     } else
       console.log("launched with failure");

@@ -149,13 +149,11 @@ var MenuPage = Page.extend({
 
     var movie_collection_page = CollectionStackPage.create({ name: "movies", collection_type: "movies" });
     var music_collection_page = CollectionStackPage.create({ name: "music", collection_type: "etree" });
-
-    APP.search_doc = Forms.make_doc(Forms.search_template)
+    var search_page = SearchPage.create({ name: "search" })
 
     Forms.add_menu_item(movie_collection_page.doc, movie_collection_page.name, this.doc);
     Forms.add_menu_item(music_collection_page.doc, music_collection_page.name, this.doc);
-
-    Forms.add_menu_item(APP.search_doc, "search", this.doc);
+    Forms.add_menu_item(search_page.doc, search_page.name, this.doc);
   },
 });
 
@@ -188,4 +186,78 @@ var CollectionStackPage = Page.extend({
           console.log("didn't get " + collection_name + " collection");
       });
   },
+});
+
+/*
+ * Search Page - shows search keyboard and results in shelves
+*/
+var SearchPage = Page.extend({
+  //
+  template: `<searchTemplate>
+               <searchField id="search"/>
+               <collectionList>
+                <shelf>
+                  <header>
+                   <title>Most Downloaded Movies</title>
+                  </header>
+                  <section id="movie_results"/>
+                </shelf>
+                <shelf>
+                  <header>
+                   <title>Most Downloaded Music</title>
+                  </header>
+                  <section id="music_results"/>
+                </shelf>
+               </collectionList>
+              </searchTemplate>`,
+  //
+  after_doc_create: function() {
+    var doc = this.doc;
+    var self = this;
+
+    // attach to doc
+    this.keyboard = doc.getElementById('search').getFeature('Keyboard')
+    this.movie_section = doc.getElementById("movie_results");
+    this.music_section = doc.getElementById("music_results");
+
+    // add event listeners
+    this.music_section.addEventListener("select", function(event){
+      APP.play_item(event, "etree");
+    });
+
+    this.movie_section.addEventListener("select", function(event){
+      APP.play_item(event, "movies");
+    });
+
+    this.keyboard.onTextChange = function () {
+      self.on_text_change();
+    }
+  },
+  //  
+  on_text_change: function() {
+    var self = this;
+    var search_options = {
+      "rows" : "50",
+      "fl[]" : "identifier,title,downloads,mediatype",
+      "sort[]" : "downloads+desc"
+    };
+    APP.ia.search(this.keyboard.text+" AND mediatype:(etree OR movies)", search_options,
+      function success(ia_data) {
+        // got search results
+        var docs = ia_data.response.docs;
+        // clear old results
+        console.log("search callback this:",this);
+        console.log("search callback self:",self);
+        Forms.remove_all_child_nodes(self.movie_section);
+        Forms.remove_all_child_nodes(self.music_section);
+        // insert new results
+        docs.map(function shelf_insert(item) {
+          var section = item.mediatype == 'movies' ? self.movie_section : self.music_section;
+          Forms.insert_lockup(self.doc, section, item.identifier, item.title);
+        });
+      }, function failure() {
+        // TODO: handle search error
+      });
+  },
+
 });
