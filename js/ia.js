@@ -167,20 +167,23 @@ App.onLaunch = function(options) {
   ];
   evaluateScripts(javascriptFiles, function(success) {
     if (success) {
-      Forms.make_menu();
-
+      // lib should be loaded by now
       APP.ia = new IA(options);
-      var forms = {"movies" : APP.movies_doc, "etree" : APP.music_doc};
-      for (var collection_type in forms) {
-	APP.ia.get_collections(collection_type, "collection", undefined,
-			       function (collection_name, collections) {
-				 APP.process_collection(collection_name, collections, forms[collection_name]);
-			       },
-			       function (collection_name, ia_data) {
-				 console.log("didn't get " + collection_name + " collection");
-			       });
-      }
-      Forms.push(APP.top_doc);
+
+      // Forms.make_menu();
+      var menu_page = MenuPage.create({name: "Menu"});
+
+ //      var forms = {"movies" : APP.movies_doc, "etree" : APP.music_doc};
+ //      for (var collection_type in forms) {
+	// APP.ia.get_collections(collection_type, "collection", undefined,
+	// 		       function (collection_name, collections) {
+	// 			 APP.process_collection(collection_name, collections, forms[collection_name]);
+	// 		       },
+	// 		       function (collection_name, ia_data) {
+	// 			 console.log("didn't get " + collection_name + " collection");
+	// 		       });
+ //      }
+      Forms.push(menu_page.doc);
       APP.setup_search_form(APP.search_doc);
       console.log("launched with success");
     } else

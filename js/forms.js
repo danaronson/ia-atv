@@ -31,15 +31,6 @@ var Forms = {
                       </shelf>
                      </collectionList>
                     </searchTemplate>`,
-                    
-  catalog_template:   `<catalogTemplate>
-                        <banner>
-                          <title id="title"/>
-                       </banner>
-                       <list>
-                         <section id="section"/>
-                       </list>
-                     </catalogTemplate>`,
 
   showcase_template: `<showcaseTemplate mode="showcase">
                         <background/>
@@ -50,6 +41,10 @@ var Forms = {
                           <section id="section"/>
                         </carousel>
                       </showcaseTemplate>`,
+
+  // registered docs and doc_definitions
+  doc_defs: {},
+  docs: {},
 
   add_menu_item: function(menu_item_doc, id, menu_doc) {
     var menu_node = menu_doc.getElementById("menu");
@@ -102,15 +97,95 @@ var Forms = {
   push: function (doc) {
     navigationDocument.pushDocument(doc);
   },
-
-  make_menu: function () {
-    APP.top_doc = this.make_doc(this.menu_template);
-    APP.movies_doc = this.make_doc(this.stack_template);
-    APP.music_doc = this.make_doc(this.stack_template);
-    APP.search_doc = this.make_doc(this.search_template)
-    this.add_menu_item(APP.movies_doc, "movies", APP.top_doc);
-    this.add_menu_item(APP.music_doc, "music", APP.top_doc);
-    this.add_menu_item(APP.search_doc, "search", APP.top_doc);
-    return;
-  }
 }
+
+/*
+ * Helper for prototypal inheritance
+*/
+Object.prototype.extend = function (extension) {
+  var hasOwnProperty = Object.hasOwnProperty;
+  var object = Object.create(this);
+  // properties are concatenated onto base object
+  for (var property in extension)
+    if (hasOwnProperty.call(extension, property) ||
+      typeof object[property] === "undefined")
+        object[property] = extension[property];
+  return object;
+};
+
+/*
+ * Page prototype object (not for direct use)
+*/
+var Page = {
+  create: function(page_params) {
+    var self = Object.create(this);
+    var parser = new DOMParser();
+    self.page_params = page_params;
+    self.name = page_params.name;
+
+    if ( self.template ) {
+      self.doc =  parser.parseFromString("<document>" + self.template + "</document>", "application/xml");
+    }
+    self.after_doc_create();
+    return self;
+  },
+  after_doc_create: function() {
+    console.log("Page.after_doc_create() - shouldn't be called");
+  },
+}
+
+/*
+ * Menu Page prototype
+*/
+var MenuPage = Page.extend({
+  //
+  template: `<menuBarTemplate>
+              <menuBar id="menu"/>
+             </menuBarTemplate>`,
+  //
+  after_doc_create: function() {
+    // APP.movies_doc = Forms.make_doc(Forms.stack_template);
+    // APP.music_doc = Forms.make_doc(Forms.stack_template);
+
+    var movie_collection_page = CollectionStackPage.create({ name: "movies", collection_type: "movies" });
+    var music_collection_page = CollectionStackPage.create({ name: "music", collection_type: "etree" });
+
+    APP.search_doc = Forms.make_doc(Forms.search_template)
+
+    Forms.add_menu_item(movie_collection_page.doc, movie_collection_page.name, this.doc);
+    Forms.add_menu_item(music_collection_page.doc, music_collection_page.name, this.doc);
+
+    Forms.add_menu_item(APP.search_doc, "search", this.doc);
+  },
+});
+
+/*
+ * Collection Stack Page - this is the top level page for movies or music
+ * It displays a list of collections
+*/
+var CollectionStackPage = Page.extend({
+  //
+  template: `<stackTemplate>
+               <banner>
+                 <title id="title"/>
+               </banner>
+               <collectionList>
+                 <grid>
+                   <section id="section"/>
+                 </grid>
+               </collectionList>
+             </stackTemplate>`,
+  //
+  after_doc_create: function() {
+    // make it an official param   
+    this.collection_type = this.page_params.collection_type;
+    var self = this;
+      APP.ia.get_collections( this.collection_type, "collection", undefined,
+        function success (collection_name, collections) {
+          APP.process_collection(collection_name, collections, self.doc);
+        },
+        function failure (collection_name, ia_data) {
+          console.log("didn't get " + collection_name + " collection");
+      });
+  },
+});
