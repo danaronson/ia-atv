@@ -10,13 +10,13 @@ var Forms = {
                         </carousel>
                       </showcaseTemplate>`,
 
-  add_menu_item: function(menu_item_doc, id, menu_doc) {
-    var menu_node = menu_doc.getElementById("menu");
-    var menu_item = this.add_node(menu_doc, menu_node, "menuItem");
-    menu_item.setAttribute("id", id);
-    this.add_node(menu_doc, menu_item, "title", id);
-    menu_node.getFeature("MenuBarDocument").setDocument(menu_item_doc, menu_item);
-  },
+  // add_menu_item: function(menu_item_doc, id, menu_doc) {
+  //   var menu_node = menu_doc.getElementById("menu");
+  //   var menu_item = this.add_node(menu_doc, menu_node, "menuItem");
+  //   menu_item.setAttribute("id", id);
+  //   this.add_node(menu_doc, menu_item, "title", id);
+  //   menu_node.getFeature("MenuBarDocument").setDocument(menu_item_doc, menu_item);
+  // },
 
   insert_lockup: function(doc, section, identifier, title, image_id) {
     var lockup = this.add_node(doc, section, "lockup");
@@ -112,10 +112,18 @@ var MenuPage = Page.extend({
     var music_collection_page = CollectionStackPage.create({ name: "music", collection_type: "etree" });
     var search_page = SearchPage.create({ name: "search" })
 
-    Forms.add_menu_item(movie_collection_page.doc, movie_collection_page.name, this.doc);
-    Forms.add_menu_item(music_collection_page.doc, music_collection_page.name, this.doc);
-    Forms.add_menu_item(search_page.doc, search_page.name, this.doc);
+    this.add_menu_item(movie_collection_page);
+    this.add_menu_item(music_collection_page);
+    this.add_menu_item(search_page);
   },
+  add_menu_item: function( subpage ) {
+    var menu_node = this.doc.getElementById("menu");
+    var menu_item = Forms.add_node(this.doc, menu_node, "menuItem");
+
+    menu_item.setAttribute("id", subpage.name);
+    Forms.add_node(this.doc, menu_item, "title", subpage.name);
+    menu_node.getFeature("MenuBarDocument").setDocument(subpage.doc, menu_item);
+  },  
 });
 
 /*
@@ -220,5 +228,4 @@ var SearchPage = Page.extend({
         // TODO: handle search error
       });
   },
-
 });
