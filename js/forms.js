@@ -144,11 +144,10 @@ var CollectionStackPage = Page.extend({
                </collectionList>
              </stackTemplate>`,
   //
-  collections: [],
-  //
   after_doc_create: function() {
     // make it an official param   
     this.collection_type = this.page_params.collection_type;
+    this.collections = [];
     var self = this;
       APP.ia.get_collections( this.collection_type, "collection", undefined,
         function success (collection_name, ia_data) {
