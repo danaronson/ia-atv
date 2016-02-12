@@ -386,18 +386,6 @@ var SearchPage = Page.extend({
     APP.ia.search(this.keyboard.text+" AND mediatype:(etree OR movies)", search_options,
       function success(ia_data) {
         self.process_search_results(ia_data);
-        // // process search results
-        // var docs = ia_data.response.docs;
-        // // clear old results
-        // console.log("search callback this:",this);
-        // console.log("search callback self:",self);
-        // Page.remove_all_child_nodes(self.movie_section);
-        // Page.remove_all_child_nodes(self.music_section);
-        // // insert new results
-        // docs.map(function shelf_insert(item) {
-        //   var section = item.mediatype == 'movies' ? self.movie_section : self.music_section;
-        //   self.insert_lockup(section, item.identifier, item.title);
-        // });
       }, function failure() {
         // TODO: handle search error
       });
