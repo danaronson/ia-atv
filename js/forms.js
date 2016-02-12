@@ -1,3 +1,5 @@
+"use strict";
+
 /*
  * Helper for prototypal inheritance
 */
@@ -14,8 +16,13 @@ Object.prototype.extend = function (extension) {
 
 /*
  * Page prototype object (not for direct use)
+ * Basically a bag of functions for dealing with DOM
 */
 var Page = {
+  /**
+   * Base factory funcition for Page, will only really be called to extend() it
+   * @method create
+   */
   create: function(page_params) {
     var self = Object.create(this);
     var parser = new DOMParser();
@@ -26,12 +33,24 @@ var Page = {
     if ( self.template ) {
       self.doc =  parser.parseFromString("<document>" + self.template + "</document>", "application/xml");
     }
+    console.log("Page.create - created doc for", self.name);
     self.after_doc_create();
     return self;
   },
+  /**
+   * This will get called after document is created, allowing us to manipulate it and add listeners
+   * @method after_doc_create
+   */
   after_doc_create: function() {
     console.log("Page.after_doc_create() - shouldn't be called");
   },
+  /**
+   * Add a node to the current Page doc
+   * @method add_node
+   * @param parent - node add child to
+   * @param nodeName - child node to add
+   * @param text (optional) - add a text node to the child also
+   */
   add_node: function(parent, nodeName, text) {
     var node = this.doc.createElement(nodeName);
     parent.appendChild(node);
@@ -40,11 +59,24 @@ var Page = {
     }
     return node;
   },
+  /**
+   * Remove all node from the parent node
+   * @method add_node
+   * @param parent - node to remove all children from
+   */
   remove_all_child_nodes: function (parent) {
     while (parent.firstChild) {
         parent.removeChild( parent.firstChild );
     }    
   },
+  /**
+   * Insert a "lockup" item to a section
+   * @method insert_lockup
+   * @param section (Element) - section to add the item to
+   * @param identifier
+   * @param title
+   * @param image_id
+   */
   insert_lockup: function(section, identifier, title, image_id) {
     var doc = this.doc;
     var lockup = this.add_node(section, "lockup");
@@ -58,13 +90,17 @@ var Page = {
     img.setAttribute("height", "360");
     var title = this.add_node(lockup, "title", title);
   },
+  /**
+   * Push this page to the top of the nav stack
+   * @method push
+   */
   push: function () {
     navigationDocument.pushDocument(this.doc);
   },  
 }
 
 /*
- * Menu Page prototype
+ * Menu Page - This is the top level menu for our app
 */
 var MenuPage = Page.extend({
   //
@@ -92,7 +128,7 @@ var MenuPage = Page.extend({
 });
 
 /*
- * Collection Stack Page - this is the top level page for movies or music
+ * Collection Stack Page - we create one of these for movies, and one for music
  * It displays a list of collections
 */
 var CollectionStackPage = Page.extend({
@@ -181,11 +217,11 @@ var CollectionByYearPage = Page.extend({
                 </carousel>
               </showcaseTemplate>`,
   //
-  items_by_year: {},
-  //
   after_doc_create: function() {
     var self = this;
     var doc = this.doc;
+
+    this.items_by_year = {};
 
     this.collection_name = this.page_params.collection_name;
     this.collection_id   = this.page_params.collection_id;
@@ -319,7 +355,7 @@ var SearchPage = Page.extend({
     var doc = this.doc;
     var self = this;
 
-    // attach to doc
+    // save off useful elements
     this.keyboard = doc.getElementById('search').getFeature('Keyboard')
     this.movie_section = doc.getElementById("movie_results");
     this.music_section = doc.getElementById("music_results");
@@ -337,11 +373,13 @@ var SearchPage = Page.extend({
       self.on_text_change();
     }
   },
-  //  
+  //
+  //  Trigger request for new results when the search text changes
+  //
   on_text_change: function() {
     var self = this;
     var search_options = {
-      "rows" : "50",
+      "rows" : "50", // TODO
       "fl[]" : "identifier,title,downloads,mediatype",
       "sort[]" : "downloads+desc"
     };
