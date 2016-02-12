@@ -1,60 +1,3 @@
-var Forms = {
-
-  // showcase_template: `<showcaseTemplate mode="showcase">
-  //                       <background/>
-  //                       <banner>
-  //                         <title id="title"/>
-  //                       </banner>
-  //                       <carousel>
-  //                         <section id="section"/>
-  //                       </carousel>
-  //                     </showcaseTemplate>`,
-
-  insert_lockup: function(doc, section, identifier, title, image_id) {
-    var lockup = this.add_node(doc, section, "lockup");
-    if (!image_id) {
-      image_id = identifier;
-    }
-    lockup.setAttribute("ia_ID", identifier);
-    var img = this.add_node(doc, lockup, "img")
-    img.setAttribute("src", "https://archive.org/services/get-item-image.php?identifier=" + image_id);
-    img.setAttribute("width", "360");
-    img.setAttribute("height", "360");
-    var title = this.add_node(doc, lockup, "title", title);
-  },
-
-  insert_list_item_lockup: function(doc, section, identifier, title) {
-    var lockup = this.add_node(doc, section, "listItemLockup");
-    lockup.setAttribute("ia_ID", identifier);
-    var title = this.add_node(doc, lockup, "title", title);
-  },
-
-  add_node: function (doc, parent, nodeName, text) {
-    var node = doc.createElement(nodeName);
-    parent.appendChild(node);
-    if (text) {
-      node.appendChild(doc.createTextNode(text));
-    }
-    return node;
-  },
-
-  // remove_all_child_nodes: function (parent) {
-  //   while (parent.firstChild) {
-  //       parent.removeChild(parent.firstChild);
-  //   }    
-  // },
-
-  make_doc: function (template) {
-    var parser = new DOMParser();
-    var doc =  parser.parseFromString("<document>" + template + "</document>", "application/xml");
-    return doc;
-  },
-
-  push: function (doc) {
-    navigationDocument.pushDocument(doc);
-  },
-}
-
 /*
  * Helper for prototypal inheritance
 */
@@ -89,11 +32,35 @@ var Page = {
   after_doc_create: function() {
     console.log("Page.after_doc_create() - shouldn't be called");
   },
+  add_node: function(parent, nodeName, text) {
+    var node = this.doc.createElement(nodeName);
+    parent.appendChild(node);
+    if (text) {
+      node.appendChild(this.doc.createTextNode(text));
+    }
+    return node;
+  },
   remove_all_child_nodes: function (parent) {
     while (parent.firstChild) {
         parent.removeChild( parent.firstChild );
     }    
   },
+  insert_lockup: function(section, identifier, title, image_id) {
+    var doc = this.doc;
+    var lockup = this.add_node(section, "lockup");
+    if (!image_id) {
+      image_id = identifier;
+    }
+    lockup.setAttribute("ia_ID", identifier);
+    var img = this.add_node(lockup, "img")
+    img.setAttribute("src", "https://archive.org/services/get-item-image.php?identifier=" + image_id);
+    img.setAttribute("width", "360");
+    img.setAttribute("height", "360");
+    var title = this.add_node(lockup, "title", title);
+  },
+  push: function () {
+    navigationDocument.pushDocument(this.doc);
+  },  
 }
 
 /*
@@ -116,10 +83,10 @@ var MenuPage = Page.extend({
   },
   add_menu_item: function( subpage ) {
     var menu_node = this.doc.getElementById("menu");
-    var menu_item = Forms.add_node(this.doc, menu_node, "menuItem");
+    var menu_item = this.add_node(menu_node, "menuItem");
 
     menu_item.setAttribute("id", subpage.name);
-    Forms.add_node(this.doc, menu_item, "title", subpage.name);
+    this.add_node(menu_item, "title", subpage.name);
     menu_node.getFeature("MenuBarDocument").setDocument(subpage.doc, menu_item);
   },  
 });
@@ -172,7 +139,7 @@ var CollectionStackPage = Page.extend({
       var collection = ia_collections[id];
       this.collections[collection["identifier"]] = collection;
       // insert it into doc
-      Forms.insert_lockup(doc, section, collection["identifier"], collection["title"] + " (" + collection["downloads"] + ")");
+      this.insert_lockup(section, collection["identifier"], collection["title"] + " (" + collection["downloads"] + ")");
     }
 
     // add event triggers for the items
@@ -189,13 +156,13 @@ var CollectionStackPage = Page.extend({
   show_catalog_page: function(ia_ID) {
     var collection_item = this.collections[ia_ID];
 
-    var showcase_page = CollectionByYearPage.create({
+    var collection_page = CollectionByYearPage.create({
       name: collection_item["title"],
       collection_item: collection_item,
       collection_name: this.collection_name,
       collection_id: ia_ID,
     });
-    Forms.push(showcase_page.doc);
+    collection_page.push();
   },
 });
 
@@ -261,8 +228,7 @@ var CollectionByYearPage = Page.extend({
     Object.keys(year_has_items).sort(function (a, b) {
       return parseInt(b) - parseInt(a);
     }).map(function (year) {
-      Forms.insert_lockup(
-        self.doc,
+      self.insert_lockup(
         self.section,
         year, // lockup item id
         year + " (" + self.items_by_year[year].length + ")",
@@ -279,7 +245,7 @@ var CollectionByYearPage = Page.extend({
       items: this.items_by_year[year],
       collection_name: this.collection_name,
     });
-    Forms.push( yearpage.doc );
+    yearpage.push();
   }
 }); // CollectionByYearPage
 
@@ -319,7 +285,7 @@ var CollectionYearItemsPage = Page.extend({
 
     doc.getElementById("title").innerHTML = this.name;
     sorted_items.map(function (item) {
-      Forms.insert_lockup(doc, section, item.identifier, item.title);
+      self.insert_lockup(section, item.identifier, item.title);
     });
 
   }
@@ -391,7 +357,7 @@ var SearchPage = Page.extend({
         // insert new results
         docs.map(function shelf_insert(item) {
           var section = item.mediatype == 'movies' ? self.movie_section : self.music_section;
-          Forms.insert_lockup(self.doc, section, item.identifier, item.title);
+          self.insert_lockup(section, item.identifier, item.title);
         });
       }, function failure() {
         // TODO: handle search error
