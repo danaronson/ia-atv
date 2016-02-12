@@ -7,6 +7,9 @@ var APP = APP || {
   collection_years: {},
 
   play: function(item_id, files, top_level_collection_name) {
+
+    console.log("play",item_id, files, top_level_collection_name);
+    
     var player = new Player;
     var playlist = new Playlist();
     var files_to_play = [];
@@ -40,23 +43,23 @@ var APP = APP || {
     player.play();
   },
 
-  show_collection_years: function (event, top_level_collection_name) {
-    var self = this;
-    var item_id = event.target.getAttribute("ia_ID")
-    var doc = Forms.make_doc(Forms.showcase_template);
-    var section = doc.getElementById("section");
-    section.addEventListener("select", function (event) {
-      self.play_item.call(self, event, top_level_collection_name);
-    });
-    Forms.push(doc);
-    var sorted_items = self.collection_years[item_id].sort(function (item_a, item_b) {
-      return parseInt(item_b.week) - parseInt(item_a.week);
-    });
-    doc.getElementById("title").innerHTML = item_id; // could use the title from the first item combined with the year
-    sorted_items.map(function (item) {
-      Forms.insert_lockup(doc, section, item.identifier, item.title);
-    });
-  },
+  // show_collection_years: function (event, top_level_collection_name) {
+  //   var self = this;
+  //   var item_id = event.target.getAttribute("ia_ID")
+  //   var doc = Forms.make_doc(Forms.showcase_template);
+  //   var section = doc.getElementById("section");
+  //   section.addEventListener("select", function (event) {
+  //     self.play_item.call(self, event, top_level_collection_name);
+  //   });
+  //   Forms.push(doc);
+  //   var sorted_items = self.collection_years[item_id].sort(function (item_a, item_b) {
+  //     return parseInt(item_b.week) - parseInt(item_a.week);
+  //   });
+  //   doc.getElementById("title").innerHTML = item_id; // could use the title from the first item combined with the year
+  //   sorted_items.map(function (item) {
+  //     Forms.insert_lockup(doc, section, item.identifier, item.title);
+  //   });
+  // },
 
   play_item: function (event, top_level_collection_name) {
     var self = this;
@@ -66,58 +69,58 @@ var APP = APP || {
     });
   },
 
-  show_catalog: function (ia_collection_id, collection_name) {
-    var self = this;
-    var collection_item = this.collections[ia_collection_id];
-    var doc = Forms.make_doc(Forms.showcase_template);
-    doc.getElementById("title").innerHTML = collection_item["title"];
-    Forms.push(doc);
-    var section = doc.getElementById("section");
-    section.addEventListener("select", function (event) {
-      self.show_collection_years.call(self, event, collection_name);
-    });
-    this.ia.get_collections(ia_collection_id, collection_name, undefined, function (collection_name, data) {
-      var collections_for_years = {}
-      data.map(function (ia_item) {
-	self.collections[ia_item.identifier] = ia_item;
-	if (!ia_item.year) {
-	  ia_item.year = "Undated";
-	}
-	var collection_with_year = ia_collection_id + ":" + ia_item.year;
-	collections_for_years[ia_item.year] = 1;
-	if (!self.collection_years[collection_with_year]) {
-	  self.collection_years[collection_with_year] = [];
-	}
-	(self.collection_years[collection_with_year]).push(ia_item);
-      });
-      Object.keys(collections_for_years).sort(function (a, b) {
-	return parseInt(b) - parseInt(a);
-      }).map(function (year) {
-	var collection_with_year = ia_collection_id + ":" + year;
-	Forms.insert_lockup(doc, section, collection_with_year, year + " (" + self.collection_years[collection_with_year].length + ")", ia_collection_id);
-      });
-      // console.log("index: " + index.toString() + ", identifier: " + ia_item.identifier + ", title: " + ia_item.title);
-    });
-  },
-  process_collection: function (collection_name, collections, form_doc) {
-    var self = this;
-    var section = form_doc.getElementById('section');
-    var title = form_doc.getElementById('title');
-    for (var id in collections) {
-      var collection = collections[id];
-      self.collections[collection["identifier"]] = collection;
-      Forms.insert_lockup(form_doc, section, collection["identifier"], collection["title"] + " (" + collection["downloads"] + ")");
-    }
-    form_doc.getElementById("section").addEventListener("highlight", function (event) {
-      title.innerHTML = collection_name + " (" + event.target.getAttribute("ia_ID") + ")";
-    });
+ //  show_catalog: function (ia_collection_id, collection_name) {
+ //    var self = this;
+ //    var collection_item = this.collections[ia_collection_id];
+ //    var doc = Forms.make_doc(Forms.showcase_template);
+ //    doc.getElementById("title").innerHTML = collection_item["title"];
+ //    Forms.push(doc);
+ //    var section = doc.getElementById("section");
+ //    section.addEventListener("select", function (event) {
+ //      self.show_collection_years.call(self, event, collection_name);
+ //    });
+ //    this.ia.get_collections(ia_collection_id, collection_name, undefined, function (collection_name, data) {
+ //      var collections_for_years = {}
+ //      data.map(function (ia_item) {
+	// self.collections[ia_item.identifier] = ia_item;
+	// if (!ia_item.year) {
+	//   ia_item.year = "Undated";
+	// }
+	// var collection_with_year = ia_collection_id + ":" + ia_item.year;
+	// collections_for_years[ia_item.year] = 1;
+	// if (!self.collection_years[collection_with_year]) {
+	//   self.collection_years[collection_with_year] = [];
+	// }
+	// (self.collection_years[collection_with_year]).push(ia_item);
+ //      });
+ //      Object.keys(collections_for_years).sort(function (a, b) {
+	// return parseInt(b) - parseInt(a);
+ //      }).map(function (year) {
+	// var collection_with_year = ia_collection_id + ":" + year;
+	// Forms.insert_lockup(doc, section, collection_with_year, year + " (" + self.collection_years[collection_with_year].length + ")", ia_collection_id);
+ //      });
+ //      // console.log("index: " + index.toString() + ", identifier: " + ia_item.identifier + ", title: " + ia_item.title);
+ //    });
+ //  },
+  // process_collection: function (collection_name, collections, form_doc) {
+  //   var self = this;
+  //   var section = form_doc.getElementById('section');
+  //   var title = form_doc.getElementById('title');
+  //   for (var id in collections) {
+  //     var collection = collections[id];
+  //     self.collections[collection["identifier"]] = collection;
+  //     Forms.insert_lockup(form_doc, section, collection["identifier"], collection["title"] + " (" + collection["downloads"] + ")");
+  //   }
+  //   form_doc.getElementById("section").addEventListener("highlight", function (event) {
+  //     title.innerHTML = collection_name + " (" + event.target.getAttribute("ia_ID") + ")";
+  //   });
 	  
-    form_doc.getElementById("section").addEventListener("select", function (event) {
-      self.show_catalog(event.target.getAttribute("ia_ID"), collection_name);
-      console.log("got subcollection");
-    });
-    console.log("got " + collection_name + " collection");
-  },
+  //   form_doc.getElementById("section").addEventListener("select", function (event) {
+  //     self.show_catalog(event.target.getAttribute("ia_ID"), collection_name);
+  //     console.log("got subcollection");
+  //   });
+  //   console.log("got " + collection_name + " collection");
+  // },
 }
 
 App.onLaunch = function(options) {

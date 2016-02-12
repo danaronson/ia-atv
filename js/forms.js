@@ -1,22 +1,14 @@
 var Forms = {
 
-  showcase_template: `<showcaseTemplate mode="showcase">
-                        <background/>
-                        <banner>
-                          <title id="title"/>
-                        </banner>
-                        <carousel>
-                          <section id="section"/>
-                        </carousel>
-                      </showcaseTemplate>`,
-
-  // add_menu_item: function(menu_item_doc, id, menu_doc) {
-  //   var menu_node = menu_doc.getElementById("menu");
-  //   var menu_item = this.add_node(menu_doc, menu_node, "menuItem");
-  //   menu_item.setAttribute("id", id);
-  //   this.add_node(menu_doc, menu_item, "title", id);
-  //   menu_node.getFeature("MenuBarDocument").setDocument(menu_item_doc, menu_item);
-  // },
+  // showcase_template: `<showcaseTemplate mode="showcase">
+  //                       <background/>
+  //                       <banner>
+  //                         <title id="title"/>
+  //                       </banner>
+  //                       <carousel>
+  //                         <section id="section"/>
+  //                       </carousel>
+  //                     </showcaseTemplate>`,
 
   insert_lockup: function(doc, section, identifier, title, image_id) {
     var lockup = this.add_node(doc, section, "lockup");
@@ -87,6 +79,7 @@ var Page = {
     self.page_params = page_params;
     self.name = page_params.name;
 
+    // build the doc from the template
     if ( self.template ) {
       self.doc =  parser.parseFromString("<document>" + self.template + "</document>", "application/xml");
     }
@@ -148,19 +141,190 @@ var CollectionStackPage = Page.extend({
                </collectionList>
              </stackTemplate>`,
   //
+  collections: [],
+  //
   after_doc_create: function() {
     // make it an official param   
     this.collection_type = this.page_params.collection_type;
     var self = this;
       APP.ia.get_collections( this.collection_type, "collection", undefined,
-        function success (collection_name, collections) {
-          APP.process_collection(collection_name, collections, self.doc);
+        function success (collection_name, ia_data) {
+          self.process_collection_data(collection_name, ia_data);
         },
         function failure (collection_name, ia_data) {
           console.log("didn't get " + collection_name + " collection");
       });
   },
+  //
+  // Process the results of the IA request and display them
+  //
+  process_collection_data: function(collection_name, ia_collections) {
+    var self = this;
+    var doc = this.doc;
+
+    this.collection_name = collection_name;
+
+    var section = doc.getElementById('section');
+    var title = doc.getElementById('title');
+
+    for (var id in ia_collections) {
+      // save data on this page object
+      var collection = ia_collections[id];
+      this.collections[collection["identifier"]] = collection;
+      // insert it into doc
+      Forms.insert_lockup(doc, section, collection["identifier"], collection["title"] + " (" + collection["downloads"] + ")");
+    }
+
+    // add event triggers for the items
+    section.addEventListener("highlight", function (event) {
+      title.innerHTML = collection_name + " (" + event.target.getAttribute("ia_ID") + ")";
+    });
+    section.addEventListener("select", function (event) {
+      self.show_catalog_page(event.target.getAttribute("ia_ID"));
+    });
+  },
+  //
+  // Event handler for choosing a collection
+  //
+  show_catalog_page: function(ia_ID) {
+    var collection_item = this.collections[ia_ID];
+
+    var showcase_page = CollectionByYearPage.create({
+      name: collection_item["title"],
+      collection_item: collection_item,
+      collection_name: this.collection_name,
+      collection_id: ia_ID,
+    });
+    Forms.push(showcase_page.doc);
+  },
 });
+
+/*
+ * Collection items, grouped by year.
+*/
+var CollectionByYearPage = Page.extend({
+  //
+  template:  `<showcaseTemplate mode="showcase">
+                <background/>
+                <banner>
+                  <title id="title"/>
+                </banner>
+                <carousel>
+                  <section id="section"/>
+                </carousel>
+              </showcaseTemplate>`,
+  //
+  items_by_year: {},
+  //
+  after_doc_create: function() {
+    var self = this;
+    var doc = this.doc;
+
+    this.collection_name = this.page_params.collection_name;
+    this.collection_id   = this.page_params.collection_id;
+    this.collection_item = this.page_params.collection_item;
+    console.log("CollectionByYearPage",this);
+
+    // set title
+    doc.getElementById("title").innerHTML = this.collection_item["title"];
+
+    this.section = doc.getElementById("section");
+    this.section.addEventListener("select", function (event) {
+      self.show_items_for_year(event.target.getAttribute("ia_ID"));
+    });
+
+    // request collections from IA
+    APP.ia.get_collections(this.collection_id, this.collection_name, undefined,
+      function success (collection_name, ia_data) {
+        self.process_collection_data( collection_name, ia_data )
+    });
+  },
+
+  //
+  // Process the results of the IA request and display them
+  //
+  process_collection_data: function(collection_name, ia_data) {
+    var self = this;
+    // keep track of which years have items
+    var year_has_items = {};
+
+    ia_data.map(function (ia_item) {
+      var year = ia_item.year || "Undated";
+      year_has_items[year] = true;
+      // bin the item by year
+      if (!(year in self.items_by_year)) {
+        self.items_by_year[year] = [];
+      }
+      (self.items_by_year[year]).push(ia_item);
+    });
+    // create a icon for each year
+    Object.keys(year_has_items).sort(function (a, b) {
+      return parseInt(b) - parseInt(a);
+    }).map(function (year) {
+      Forms.insert_lockup(
+        self.doc,
+        self.section,
+        year, // lockup item id
+        year + " (" + self.items_by_year[year].length + ")",
+        self.collection_id
+      );
+    });
+  },
+  //
+  // Show the items for the selected year
+  //
+  show_items_for_year: function(year) {
+    var yearpage = CollectionYearItemsPage.create({
+      name: year,
+      items: this.items_by_year[year],
+      collection_name: this.collection_name,
+    });
+    Forms.push( yearpage.doc );
+  }
+}); // CollectionByYearPage
+
+
+/*
+ * Collection items for the given year
+*/
+var CollectionYearItemsPage = Page.extend({
+  //
+  template:  `<showcaseTemplate mode="showcase">
+                <background/>
+                <banner>
+                  <title id="title"/>
+                </banner>
+                <carousel>
+                  <section id="section"/>
+                </carousel>
+              </showcaseTemplate>`,
+  //
+  after_doc_create: function() {
+    var self = this;
+    var doc = this.doc;
+
+    console.log("CollectionYearItemsPage.after_doc_create", this);
+
+    this.collection_name = this.page_params.collection_name;
+    this.items = this.page_params.items;
+
+    var section = doc.getElementById("section");
+    section.addEventListener("select", function (event) {
+      APP.play_item(event, self.collection_name);
+    });
+
+    var sorted_items = this.items.sort(function (item_a, item_b) {
+      return parseInt(item_b.week) - parseInt(item_a.week);
+    });
+
+    doc.getElementById("title").innerHTML = this.name;
+    sorted_items.map(function (item) {
+      Forms.insert_lockup(doc, section, item.identifier, item.title);
+    });
+
+  }
+}); // CollectionYearItemsPage
+
 
 /*
  * Search Page - shows search keyboard and results in shelves
@@ -233,4 +397,4 @@ var SearchPage = Page.extend({
         // TODO: handle search error
       });
   },
-});
+}); // SearchPage
