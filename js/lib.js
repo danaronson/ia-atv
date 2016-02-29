@@ -44,6 +44,7 @@ IA.prototype.get_collections = function(collection_name, result_type, num, succe
   }
   var options = {"rows" : "1", "fl[]" : "identifier,title,year,downloads,week"}
   if (num) {
+
     options["rows"] = num.toString();
     // options["rows"] = "100"; FOR TESTING
   }
