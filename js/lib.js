@@ -6,12 +6,15 @@ IA.prototype.search = function(query_string, search_options, success_callback, f
   var self = this;
   var request = new XMLHttpRequest();
   var option_string = "&output=json";
+  var now = Date.now();
   for (var key in search_options) {
     option_string += "&" + key + "=" + search_options[key];
   }
   request.responseType = "application/json";
   var request_string = this.APIURL + "advancedsearch.php?q=" + query_string + option_string;
+  request_string = encodeURI(request_string);
   request.addEventListener("load", function() {
+    console.log("request took " + (Date.now() - now) + " milliseconds");
     if (200 != request.status) {
       console.log("failure for: " + request_string);
       failure_callback.call(self, request);
@@ -21,7 +24,7 @@ IA.prototype.search = function(query_string, search_options, success_callback, f
     }
   });
   request.addEventListener("error", function (error) {
-      console.log("failure for: " + request_string);
+    console.log("failure for: " + request_string);
     failure_callback.call(self, request, error);
   });
   request.addEventListener("timeout", function () {
@@ -29,7 +32,6 @@ IA.prototype.search = function(query_string, search_options, success_callback, f
   });
 
   console.log("about to request: " + request_string);
-  request_string = encodeURI(request_string);
   request.open("GET", request_string);
   request.setRequestHeader("Content-Type", "application/json")
   request.setRequestHeader("Accept", "application/json")

@@ -16,7 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, TVApplicationControllerDe
     var appController: TVApplicationController?
 
 
-    func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
         /*
         Create the TVApplicationControllerContext for this application
@@ -25,10 +25,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, TVApplicationControllerDe
         */
         let appControllerContext = TVApplicationControllerContext()
         
-        let d:UIDevice = UIDevice.currentDevice()
-        let simulate = d.name.rangeOfString("Simulator") != nil
-
-        let path = NSBundle.mainBundle().pathForResource("Private", ofType: "plist")
+         let path = Bundle.main.path(forResource: "Private", ofType: "plist")
         if (path == nil) {
             NSLog("Must have Private.plist with 'JSPREFIX', 'SIMULATORJSPREFIX' and 'APIURL' defined");
             exit(-1);
@@ -36,11 +33,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, TVApplicationControllerDe
         let myDict = NSDictionary(contentsOfFile: path!);
         var baseURL:String
             //var baseURL:String = myDict?.valueForKey("JSPREFIX") as! String
-        if (simulate) {
-            baseURL = myDict?.valueForKey("SIMULATORJSPREFIX") as! String
-        } else {
-            baseURL = myDict?.valueForKey("JSPREFIX") as! String
-        }
+#if (arch(i386) || arch(x86_64))
+        baseURL = myDict?.value(forKey: "SIMULATORJSPREFIX") as! String
+#else
+        baseURL = myDict?.value(forKey: "JSPREFIX") as! String
+#endif
     
         let bootURL = baseURL + "js/ia.js"
         
@@ -52,20 +49,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, TVApplicationControllerDe
         This will allow for the resource to be retrieved and UI presented to
         the user quickly.
         */
-        if let javaScriptURL = NSURL(string: bootURL) {
+        if let javaScriptURL = URL(string: bootURL) {
             appControllerContext.javaScriptApplicationURL = javaScriptURL
         }
         
         appControllerContext.launchOptions["BASEURL"] = baseURL
         
-        appControllerContext.launchOptions["APIURL"] = myDict?.valueForKey("APIURL") as! String
+        appControllerContext.launchOptions["APIURL"] = myDict?.value(forKey: "APIURL") as! String
         
         
-        if let launchOptions = launchOptions as? [String: AnyObject] {
-            for (kind, value) in launchOptions {
-                appControllerContext.launchOptions[kind] = value
-            }
-        }
+//        for (kind, value) in launchOptions! {
+//            appControllerContext.launchOptions[(kind as? String)!] = value
+//        }
         
         appController = TVApplicationController(context: appControllerContext, window: window, delegate: self)
 
@@ -74,25 +69,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate, TVApplicationControllerDe
     
     // MARK: TVApplicationControllerDelegate
     
-    func appController(appController: TVApplicationController, didFinishLaunchingWithOptions options: [String: AnyObject]?) {
-        print("\(__FUNCTION__) invoked with options: \(options)")
+    func appController(_ appController: TVApplicationController, didFinishLaunching options: [String: Any]?) {
+        print("\(#function) invoked with options: \(options)")
     }
     
-    func appController(appController: TVApplicationController, didFailWithError error: NSError) {
-        print("\(__FUNCTION__) invoked with error: \(error)")
+    func appController(_ appController: TVApplicationController, didFail error: Error) {
+        print("\(#function) invoked with error: \(error)")
         
         let title = "Error Launching Application"
         let message = error.localizedDescription
-        let alertController = UIAlertController(title: title, message: message, preferredStyle:.Alert )
+        let alertController = UIAlertController(title: title, message: message, preferredStyle:.alert )
         // we want to send the message back to matinee
-        self.appController?.navigationController.presentViewController(alertController, animated: true, completion: { () ->     Void in
+        self.appController?.navigationController.present(alertController, animated: true, completion: { () ->     Void in
             // ...
         })
         
     }
     
-    func appController(appController: TVApplicationController, didStopWithOptions options: [String: AnyObject]?) {
-        print("\(__FUNCTION__) invoked with options: \(options)")
+    func appController(_ appController: TVApplicationController, didStop options: [String: Any]?) {
+        print("\(#function) invoked with options: \(options)")
     }
     
 

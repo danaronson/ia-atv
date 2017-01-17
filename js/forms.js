@@ -178,10 +178,12 @@ var CollectionStackPage = Page.extend({
     }
 
     // add event triggers for the items
-    section.addEventListener("highlight", function (event) {
-      title.innerHTML = collection_name + " (" + event.target.getAttribute("ia_ID") + ")";
-    });
+    //section.addEventListener("highlight", function (event) {
+      //title.innerHTML = collection_name + " (" + event.target.getAttribute("ia_ID") + ")";
+      //console.log("name is: " + title.innerHTML);
+    //});
     section.addEventListener("select", function (event) {
+      console.log(event.target.getAttribute("ia_ID") + " selected");
       self.show_catalog_page(event.target.getAttribute("ia_ID"));
     });
   },
