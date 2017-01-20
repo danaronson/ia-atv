@@ -2,6 +2,7 @@
   "images" : [
     {
       "idiom" : "tv",
+      "filename" : "TVUIExample_BG_LG.png",
       "scale" : "1x"
     }
   ],

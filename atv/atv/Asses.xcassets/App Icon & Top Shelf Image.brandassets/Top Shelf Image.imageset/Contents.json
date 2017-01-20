@@ -2,6 +2,7 @@
   "images" : [
     {
       "idiom" : "tv",
+      "filename" : "blue_billboard.png",
       "scale" : "1x"
     }
   ],

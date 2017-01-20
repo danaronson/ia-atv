@@ -10,8 +10,8 @@
 		379F9AB31C4B1FEA001EB8AD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 379F9AB21C4B1FEA001EB8AD /* AppDelegate.swift */; };
 		379F9AB51C4B1FEA001EB8AD /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 379F9AB41C4B1FEA001EB8AD /* ViewController.swift */; };
 		379F9AB81C4B1FEA001EB8AD /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 379F9AB61C4B1FEA001EB8AD /* Main.storyboard */; };
-		379F9ABA1C4B1FEB001EB8AD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 379F9AB91C4B1FEB001EB8AD /* Assets.xcassets */; };
 		379F9AC21C4B2B1A001EB8AD /* Private.plist in Resources */ = {isa = PBXBuildFile; fileRef = 379F9AC11C4B2B1A001EB8AD /* Private.plist */; };
+		37C826171E319B4300222B0B /* Asses.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 37C826161E319B4300222B0B /* Asses.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -19,9 +19,9 @@
 		379F9AB21C4B1FEA001EB8AD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		379F9AB41C4B1FEA001EB8AD /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		379F9AB71C4B1FEA001EB8AD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		379F9AB91C4B1FEB001EB8AD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		379F9ABB1C4B1FEB001EB8AD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		379F9AC11C4B2B1A001EB8AD /* Private.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Private.plist; sourceTree = "<group>"; };
+		37C826161E319B4300222B0B /* Asses.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Asses.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,8 +58,8 @@
 				379F9AC11C4B2B1A001EB8AD /* Private.plist */,
 				379F9AB41C4B1FEA001EB8AD /* ViewController.swift */,
 				379F9AB61C4B1FEA001EB8AD /* Main.storyboard */,
-				379F9AB91C4B1FEB001EB8AD /* Assets.xcassets */,
 				379F9ABB1C4B1FEB001EB8AD /* Info.plist */,
+				37C826161E319B4300222B0B /* Asses.xcassets */,
 			);
 			path = atv;
 			sourceTree = "<group>";
@@ -96,7 +96,9 @@
 				TargetAttributes = {
 					379F9AAE1C4B1FEA001EB8AD = {
 						CreatedOnToolsVersion = 7.2;
+						DevelopmentTeam = ZSFX78H3ZT;
 						LastSwiftMigration = 0820;
+						ProvisioningStyle = Manual;
 					};
 				};
 			};
@@ -123,9 +125,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				379F9ABA1C4B1FEB001EB8AD /* Assets.xcassets in Resources */,
 				379F9AB81C4B1FEA001EB8AD /* Main.storyboard in Resources */,
 				379F9AC21C4B2B1A001EB8AD /* Private.plist in Resources */,
+				37C826171E319B4300222B0B /* Asses.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -250,10 +252,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Distribution";
+				DEVELOPMENT_TEAM = ZSFX78H3ZT;
 				INFOPLIST_FILE = atv/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = org.archive.atv;
+				PRODUCT_BUNDLE_IDENTIFIER = archivetv;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "fff6f1fb-d1ac-434d-bc36-e50139945190";
+				PROVISIONING_PROFILE_SPECIFIER = tvos;
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
@@ -263,10 +269,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Distribution";
+				DEVELOPMENT_TEAM = ZSFX78H3ZT;
 				INFOPLIST_FILE = atv/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = org.archive.atv;
+				PRODUCT_BUNDLE_IDENTIFIER = archivetv;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "fff6f1fb-d1ac-434d-bc36-e50139945190";
+				PROVISIONING_PROFILE_SPECIFIER = tvos;
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
