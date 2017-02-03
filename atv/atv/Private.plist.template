@@ -4,8 +4,10 @@
 <dict>
 	<key>APIURL</key>
 	<string>https://archive.org/</string>
+	<key>JSPREFIXOLD</key>
+	<string>https://s3.amazonaws.com/ia-atv/</string>
 	<key>JSPREFIX</key>
-	<string>https://s3.amazonaws.com/ia-atv-js/appletv/</string>
+	<string>https://archive.org/download/ia-atv/</string>
 	<key>SIMULATORJSPREFIX</key>
 	<string>http://localhost:9001/</string>
 </dict>
