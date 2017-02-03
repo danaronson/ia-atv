@@ -41,6 +41,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, TVApplicationControllerDe
     
         let bootURL = baseURL + "js/ia.js"
         
+        let defaults = UserDefaults.standard
+        defaults.set(bootURL, forKey: "js_url")
+        
         /*
         The JavaScript URL is used to create the JavaScript context for your
         TVMLKit application. Although it is possible to separate your JavaScript
