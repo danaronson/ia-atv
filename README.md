@@ -5,7 +5,7 @@ AppleTV interface to Internet Archive
 
 To get your development environment up and runnning:
 
-1. Install Xcode
+1. Install Xcode (2)
 2. Copy Private.plist.template to Private.plist and edit it to include actual values.
     * APIURL is the prefix for the API resouce endpoints
     * JSPREFIX is the http(s) prefix for the directory serving javascript
